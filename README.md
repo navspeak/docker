@@ -26,7 +26,7 @@
 <br> License: Quantity: 10 Nodes	Expiration date: 2020-01-04	License is currently active
 <br> Successfully activated engine license on existing enterprise engine.
 
-## UCP
+## UCP - Universal control Plane
 https://docs.docker.com/ee/ucp/ucp-architecture/
 https://docs.docker.com/v17.09/datacenter/ucp/2.1/guides/admin/install/system-requirements/
 ```
@@ -39,6 +39,11 @@ https://docs.docker.com/v17.09/datacenter/ucp/2.1/guides/admin/install/system-re
 - Min reqmt for UCP
 -- 8 GB RAM for Mgr Node, 4GB for worker nodes
 -- 5 GB free space for /var partition for mgr nodes, 500 MB for worker nodes
+* Access Control
+  * Subject - individual user, org, team
+  * Role - is a set of permitted API operations that you can assign to a specific subject and collection (No access, Read Only, Restricted Control, Full Control)
+  * Collection - Swarm resources viz. Nodes, Containers, Services, Networks, Volumes, Secrets, Application Configs
+
 
 
 ## Storage Driver
