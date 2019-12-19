@@ -35,6 +35,11 @@ https://docs.docker.com/v17.09/datacenter/ucp/2.1/guides/admin/install/system-re
 > docker/ucp:3.1.4 install --host-address 165.227.37.133 \
 > --force-minimums
 ```
+- You will get docker URL, username and password in the output of above cmd. You can login and upload the license file to continue.
+- Min reqmt for UCP
+-- 8 GB RAM for Mgr Node, 4GB for worker nodes
+-- 5 GB free space for /var partition for mgr nodes, 500 MB for worker nodes
+
 
 ## Storage Driver
 http://100daysofdevops.com/21-days-of-docker-day-13-docker-storage-part-2/2/
