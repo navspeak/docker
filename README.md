@@ -7,7 +7,7 @@
 - [root@node1 ~]# yum install -y wget
 - [root@node1 ~]# export DOCKERURL="https://storebits.docker.com/ee/trial/sub-xxxx-fcfa-xxx-8fef-xxx" (copy from docker hub)
 - [root@node1 ~]# wget $DOCKERURL/centos/docker-ee.repo
-- root@node1 ~]# cp docker-ee.repo /etc/yum
+- root@node1 ~]# cp docker-ee.repo /etc/yum.repo.d
 - [root@node1 ~]# sudo -E sh -c 'echo "$DOCKERURL/centos" > /etc/yum/vars/dockerurl'
 - [root@node1 ~]# yum -y install docker-ee docker-ee-cli containerd.io
 - [root@node1 ~]# systemctl status docker
