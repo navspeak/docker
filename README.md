@@ -99,6 +99,26 @@ To backup images get the DTR volume :
 cd /var/lib/docker/volumes/<br>
 tar -czvf dtr-registry-backup.tar.gz dtr-reistry-<replicaid>
 
+## Limiting CPU for containers
+- --cpus=1 (if u have 2 CPUs, this guarantees at most 1 CPU. You can also provide 0.5 as a value)
+- --cpuset-cpus (limits the no. of CPU cores a container can use. Takes comma separated list or hyphen seperated range of CPUs a container can use. 1st container is numbered 0. 0-2 means usage of 1, 2nd and 3rd CPU. 1,3 means 1st and 2nd CPU)
+- By default, a container can use as much resource as the host's kernel scheduler allows. On Linuz on OOM, linux starts killing process to free up memory.
+- Limit (-m, --memory) = hard limit. Reservation (--memory-reservation) = soft limit. When there is a low memory, the reservation tries to bring container's memory consumption at or below the reservation limit.
+- docker container run -dt --name c1 -m 500m --memory-reservation 250m busybox sh | free -m
+
+## Swarm Mutual TLS (MTLS)
+- On a worker node and manager node
+<br> [root@node2 ~]# cd /var/lib/docker/swarm/certificates
+<br> [root@node2 certificates]# ls
+<br> swarm-node.crt  swarm-node.key  swarm-root-ca.crt
+- On worker docker swarm leave => the certificates are gone | On master do "docker node rm <ID>" | docker node ls -> no wrk node
+- docker swarm ca --rotate & if you run "docker swarm join-token SWMTKN-1-OLD 165.227.37.133:2377" => Error response from daemon: remote CA does not match fingerprint. Expected: xxxx"
+  - This is because join token is associated w/ the CA and it's rotated now. So we need new join token "docker swarm join-token worker" and use this to join a node on worker.
+  
+
+# UCP Client Bundles
+- is a group of certificates downloadable directly from UCP
+- Depending upon the permission associated with the user, you can now execute docker swarm commands from your remote machine that take effect on remote cluster. Like u can create a new svc in UCP from ur laptop or login to remote container from ur laptop without SSH via API
 
 ## Storage Driver
 http://100daysofdevops.com/21-days-of-docker-day-13-docker-storage-part-2/2/
