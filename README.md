@@ -7,7 +7,7 @@
 - [root@node1 ~]# yum install -y wget
 - [root@node1 ~]# export DOCKERURL="https://storebits.docker.com/ee/trial/sub-xxxx-fcfa-xxx-8fef-xxx" (copy from docker hub)
 - [root@node1 ~]# wget $DOCKERURL/centos/docker-ee.repo
-- root@node1 ~]# cp docker-ee.repo /etc/yum.repo.d
+- root@node1 ~]# cp docker-ee.repo /etc/yum.repos.d/
 - [root@node1 ~]# sudo -E sh -c 'echo "$DOCKERURL/centos" > /etc/yum/vars/dockerurl'
 - [root@node1 ~]# yum -y install docker-ee docker-ee-cli containerd.io
 - [root@node1 ~]# systemctl status docker
@@ -29,6 +29,7 @@
 ## UCP - Universal control Plane
 https://docs.docker.com/ee/ucp/ucp-architecture/
 https://docs.docker.com/v17.09/datacenter/ucp/2.1/guides/admin/install/system-requirements/
+https://success.docker.com/article/docker-enterprise-best-practices
 ```
 [root@node1 ~]# docker container run --rm -it --name ucp \
 > -v /var/run/docker.sock:/var/run/docker.sock \
@@ -97,7 +98,7 @@ docker container run --log-driver none -i --rm docker/dtr backup \
 
 To backup images get the DTR volume :
 cd /var/lib/docker/volumes/<br>
-tar -czvf dtr-registry-backup.tar.gz dtr-reistry-<replicaid>
+tar -czvf dtr-registry-backup.tar.gz dtr-reistry-REPLICAID
 
 ## Limiting CPU for containers
 - --cpus=1 (if u have 2 CPUs, this guarantees at most 1 CPU. You can also provide 0.5 as a value)
@@ -111,14 +112,42 @@ tar -czvf dtr-registry-backup.tar.gz dtr-reistry-<replicaid>
 <br> [root@node2 ~]# cd /var/lib/docker/swarm/certificates
 <br> [root@node2 certificates]# ls
 <br> swarm-node.crt  swarm-node.key  swarm-root-ca.crt
-- On worker docker swarm leave => the certificates are gone | On master do "docker node rm <ID>" | docker node ls -> no wrk node
-- docker swarm ca --rotate & if you run "docker swarm join-token SWMTKN-1-OLD 165.227.37.133:2377" => Error response from daemon: remote CA does not match fingerprint. Expected: xxxx"
+- On worker docker swarm leave => the certificates are gone | On master do "docker node rm ID" | docker node ls -> no wrk node
+- docker swarm ca --rotate (You will see that .crt and .key are rotated on all nodes)
+- You can check md5sum swarm-node.crt
+- if you run "docker swarm join-token SWMTKN-1-OLD 165.227.37.133:2377" => Error response from daemon: remote CA does not match fingerprint. Expected: xxxx"
   - This is because join token is associated w/ the CA and it's rotated now. So we need new join token "docker swarm join-token worker" and use this to join a node on worker.
+  - By default each node in the swarm renews its certificate every 3 months. 
+    - Override by "docker swarm --update --cert-expiry 2160h0m0s
   
 
 # UCP Client Bundles
 - is a group of certificates downloadable directly from UCP
 - Depending upon the permission associated with the user, you can now execute docker swarm commands from your remote machine that take effect on remote cluster. Like u can create a new svc in UCP from ur laptop or login to remote container from ur laptop without SSH via API
+- Download client bundle locally
+- Local machine:
+  - docker run -dt --name myubuntu ubuntu
+  - docker cp "ucp-bundle-admin.zip" myubuntu:/tmp
+  - docker exec -it myubunti bash
+ ```
+ /# mkdir ucp
+ /# cp /tmp/ucp-*.zip ucp
+ /# cd ucp && unzip *.zip
+ /# cat env.sh (See that it has export DOCKER_HOST=tcp://ucp-url etc)
+ /# eval "$(<env.sh)" 
+ /# echo DOCKER_HOST
+ /# curl -sSL https://get.docker.com | sh
+ /#...
+ /# docker info -> shows docker ee on remote machine where UCP is installed
+ /# docker service create --name mydemoservice nginx => created on UCP machine
+ ```
+ 
+ ## Docker Content Trust
+ - gives ability to verify boh the integrity & the publisher of all the data received from registry over any channel
+ - docker trust inspect IMAGE => gives signers
+ - export DOCKER_CONTENT_TRUST=1
+ - https://docs.docker.com/engine/security/trust/content_trust/
+
 
 ## Storage Driver
 http://100daysofdevops.com/21-days-of-docker-day-13-docker-storage-part-2/2/
