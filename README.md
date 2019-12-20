@@ -44,6 +44,60 @@ https://docs.docker.com/v17.09/datacenter/ucp/2.1/guides/admin/install/system-re
   * Role - is a set of permitted API operations that you can assign to a specific subject and collection (No access, Read Only, Restricted Control, Full Control)
   * Collection - Swarm resources viz. Nodes, Containers, Services, Networks, Volumes, Secrets, Application Configs
 
+# DTR - Docker Trusted Registry
+- https://docs.docker.com/ee/dtr/architecture/
+- containerized application that runs on top of UCP
+- 16 GB of RAM for nodes running DTR
+- 2 vCPUs for node running DTR
+- 10 GB of free space
+- To install DTR, all nodes must be a worker node managed by UCP. Must have fixed hostname.
+```
+docker run -it --rm docker/dtr install \
+  --ucp-node node2 \
+  --ucp-username admin \
+  --ucp-url https://165.227.37.133 \
+  --ucp-insecure-tls
+ ```
+ - To uninstall
+ ```
+ docker run -it --rm docker/dtr destroy --ucp-insecure-tls
+ ```
+ <br> Enter ucp URL, username, password
+ 
+ Also on manager node:
+ ```
+ [root@node1 ~]# docker exec -e ETCDCTL_API=3 ucp-kv etcdctl --endpoints https://127.0.0.1:2379 get /orca/v1/config2/dtr/ --prefix --keys-only 2>/dev/null
+/orca/v1/config2/dtr/138.197.164.234
+
+[root@node1 ~]# docker exec -e ETCDCTL_API=3 ucp-kv etcdctl --endpoints https://127.0.0.1:2379 del /orca/v1/config2/dtr/138.197.164.234 2>/dev/null
+1
+[root@node1 ~]# docker exec -e ETCDCTL_API=3 ucp-kv etcdctl --endpoints https://127.0.0.1:2379 get /orca/v1/config2/dtr/ --prefix --keys-only 2>/dev/null
+[root@node1 ~]# 
+```
+## Configuring Trusted CA  & pushing images to DTR
+- wget https://138.197.164.234/ca --no-check-certificate
+- cp ca /etc/pki/ca-trust/source/anchors/example.com.crt
+- update-ca-trust
+- add entry in /etc/hosts
+- systemctl restart docker
+- docker login example.com
+- docker pull busybox
+- docker tag busybox:latest example.com/admin/webserver:v1
+- docker push example.com/admin/webserver:v1
+
+## DTR Backup
+- doesnt cause downtime
+- doesnt backup images stored in your registry or users and orgs (done by UCP bkp)
+- https://docs.docker.com/ee/admin/backup/back-up-dtr/
+```
+docker container run --log-driver none -i --rm docker/dtr backup \
+--ucp-url https://165.227.37.133:443 -ucp-insecure-tls --ucp-username admin 
+--ucp-password xxx > backup.tar
+```
+
+To backup images get the DTR volume :
+cd /var/lib/docker/volumes/<br>
+tar -czvf dtr-registry-backup.tar.gz dtr-reistry-<replicaid>
 
 
 ## Storage Driver
