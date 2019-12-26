@@ -147,6 +147,29 @@ tar -czvf dtr-registry-backup.tar.gz dtr-reistry-REPLICAID
  - docker trust inspect IMAGE => gives signers
  - export DOCKER_CONTENT_TRUST=1
  - https://docs.docker.com/engine/security/trust/content_trust/
+ 
+ ## Docker group
+ - useradd newuser | su - newuser | docker ps => error 
+ <br> "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.40/containers/json: dial unix /var/run/docker.sock: connect: permission denied <br>
+ - vi /etc/group => docker:x:993: newuser OR 
+ - sudo usermod -aG docker newuser
+ 
+ ## Linux capabilities
+ 
+ - https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+ ```
+docker run -dt —name cap01 —cap-add LINUX_IMMUTABLE amazonlinux
+docker exec -it cap01 bash
+# yum what provides chattr
+# yum -y install e2fsprogs
+# touch test.txt
+# chattr +i test.txt
+```
+ ## Priviledged Containers
+ - Docker containers are not allowed to access any devices on the host
+- Hence docker container can’t, by default, run use cases like docker containers inside a docker container
+- Privileged containers can access all the devices on the host as well as have configs in AppArmor or SELinux to allow the container nearly all the same access to the host as processes running outside containers on the host
+ - docker run -dt —privileged amzonlinux bash
 
 
 ## Storage Driver
