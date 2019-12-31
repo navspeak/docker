@@ -183,3 +183,39 @@ http://100daysofdevops.com/21-days-of-docker-day-13-docker-storage-part-2/2/
 <br> brw-------. 1 root root 253, 1 Dec 18 22:17 backingFsBlockDev
 <br> drwx------. 2 root root      6 Dec 18 16:38 l
 
+<br> The new l (lowercase L) directory contains shortened layer identifiers as symbolic links. 
+<br> These identifiers are used to avoid hitting the page size limitation on arguments to the mount command.
+```
+$ ls -l /var/lib/docker/overlay2/l
+total 0
+[node1] (local) root@192.168.0.18 ~
+$ docker pull alpine
+Using default tag: latest
+latest: Pulling from library/alpine
+e6b0cf9c0882: Pull complete 
+Digest: sha256:2171658620155679240babee0a7714f6509fae66898db422ad803b951257db78
+Status: Downloaded newer image for alpine:latest
+docker.io/library/alpine:latest
+[node1] (local) root@192.168.0.18 ~
+$ ls -l /var/lib/docker/overlay2/l
+total 0
+lrwxrwxrwx    1 root     root            72 Dec 31 17:11 YJHCGPQJLO6Q65JWH7XUBTI2OX -> ../f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7/diff
+[node1] (local) root@192.168.0.18 ~
+$ 
+```
+
+```
+$ cd /var/lib/docker/overlay2/f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7[node1] (local) root@192.168.0.18 /var/lib/docker/overlay2/f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7
+$ ls -l
+total 4
+drwxr-xr-x   19 root     root           199 Dec 31 17:11 diff
+-rw-r--r--    1 root     root            26 Dec 31 17:11 link
+[node1] (local) root@192.168.0.18 /var/lib/docker/overlay2/f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7
+$ cat link
+YJHCGPQJLO6Q65JWH7XUBTI2OX[node1] (local) root@192.168.0.18 /var/lib/docker/overlay2/f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7
+$ cd diff/
+[node1] (local) root@192.168.0.18 /var/lib/docker/overlay2/f90df637b413292da87ac997ec07912778e7a84f6d8c0a091b9d37461f7b1ae7/diff
+$ ls
+bin    etc    lib    mnt    proc   run    srv    tmp    var
+dev    home   media  opt    root   sbin   sys    usr
+```
