@@ -173,7 +173,18 @@ docker exec -it cap01 bash
 
 
 ## Storage Driver
+- docker ps -s => size (writeable layer) & Virtual Size (writeable layer + Readonly layer)
+- https://docs.docker.com/storage/storagedriver/#container-size-on-disk
+
+## Overlay2 and Overlay
 http://100daysofdevops.com/21-days-of-docker-day-13-docker-storage-part-2/2/
+<br>https://docs.docker.com/storage/storagedriver/overlayfs-driver/
+<br> Read upperDir, lowerDir, copy_up, whiteout file
+
+-  OverlayFS supports page cache sharing. Multiple containers accessing the same file share a single page cache entry for that file. This makes the overlay and overlay2 drivers efficient with memory and a good option for high-density use cases such as PaaS.
+- https://docs.docker.com/storage/storagedriver/overlayfs-driver/#overlayfs-and-docker-performance
+- The OverlayFS copy_up operation is faster than the same operation with AUFS, because AUFS supports more layers than OverlayFS and it is possible to incur far larger latencies if searching through many AUFS layers. overlay2 supports multiple layers as well, but mitigates any performance hit with caching.
+- touch workaround for yum and open https://docs.docker.com/storage/storagedriver/overlayfs-driver/#limitations-on-overlayfs-compatibility
 <br> [root@node1 overlay2]# docker system info | grep -i storage
 <br> Storage Driver: overlay2
 <br> [root@node1 overlay2]# pwd
