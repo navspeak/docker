@@ -1,3 +1,40 @@
+# Syllabus:
+- Orchestration (25%)
+- Image Creation, Management, and Registry (20%)
+- Installation and Configuration (15%)
+- Networking (15%)
+- Security (15%)
+- Storage and Volumes (10%)
+
+https://medium.com/bb-tutorials-and-thoughts/250-practice-questions-for-the-dca-exam-84f3b9e8f5ce
+
+# Images:
+## Dockerfile
+https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+```
+docker build -t myimage:latest -<<EOF
+FROM busybox
+COPY somefile.txt .
+RUN cat /somefile.txt
+EOF
+
+# build an image using the current directory as context, and a Dockerfile passed through stdin
+docker build -t myimage:latest -f- . <<EOF
+FROM busybox
+COPY somefile.txt .
+RUN cat /somefile.txt
+EOF
+
+```
+- Multistage build 
+- leveraging caching
+- Only the instructions RUN, COPY, ADD create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
+- Stop at a specific build stage : docker build --target builder -t alexellis2/href-counter:latest .
+- https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
+- docker port to find port mapping. EXPOSE, -p and -P
+- LABEL vs MAINTAINER (deprecated) -> docker inspect to view image labels.
+
+
 # docker EE:
 
 ## Installation on centos digital ocean droplet:
