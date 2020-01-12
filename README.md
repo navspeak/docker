@@ -128,8 +128,9 @@ CMD  /code/run-extras
  - The main purpose of a CMD is to provide defaults for an executing container. These defaults can include an executable, or they can omit the executable, in which case you must specify an ENTRYPOINT instruction as well. - CMD - JSON Array w/o shell
 - CMD ["executable","param1","param2"] (exec form, this is the preferred form)
 - CMD ["param1","param2"] (as default parameters to ENTRYPOINT)
-- CMD command param1 param2 (shell form)
-- CMD = Overwrite, ENTRYPOINT = doesn't override but appends
+- CMD command param1 param2 (shell form) https://docs.docker.com/engine/reference/builder/#entrypoint
+- CMD = Overwrite, ENTRYPOINT = doesn't override (except --entrypoint) but appends
+- shell form doesn't catch signal from docker stop
 - like if CMD ["sh"] and during run if u say "ping -c 10 google.com", it will run ping 10 times and exit
 ```
    FROM busybox
@@ -140,7 +141,7 @@ CMD  /code/run-extras
    
 ```
 - https://www.ctl.io/developers/blog/post/dockerfile-entrypoint-vs-cmd/
-
+- https://www.ctl.io/developers/blog/post/dockerfile-add-vs-copy/
 - COPY vs ADD (copy + URL or even extract tar file into destination)
 - use curl or wget to download .tar from remote location instead of ADD. Use ADD for uncompressing local file only
 - Use COPY over ADD when possible
@@ -151,6 +152,7 @@ CMD  /code/run-extras
 - docker search --format "{{.Name}}: {{.StarCount}}" nginx
 - docker search --format "table {{.Name}}\t{{.IsAutomated}}\t{{.IsOfficial}}" nginx
 - docker container commit container1 modified-image-based-on-container1 (while container is being committed, its process is  paused)
+## Flattening a docker container
 
 
 # docker EE:
