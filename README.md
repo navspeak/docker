@@ -154,6 +154,9 @@ CMD  /code/run-extras
 - docker container commit container1 modified-image-based-on-container1 (while container is being committed, its process is  paused)
 ## Flattening a docker container
 
+- docker container run --name myubuntu ubuntu
+- docker export myubuntu > myubuntu.tar
+- cat myubuntu.tar | docker import - myubuntuimage:latest => one layer - less size
 
 # docker EE:
 
