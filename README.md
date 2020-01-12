@@ -139,6 +139,7 @@ CMD  /code/run-extras
    $ docker run -dt --name c1 myimage sh => /bin/ping sh (appended)
    
 ```
+- https://www.ctl.io/developers/blog/post/dockerfile-entrypoint-vs-cmd/
 
 - COPY vs ADD (copy + URL or even extract tar file into destination)
 - use curl or wget to download .tar from remote location instead of ADD. Use ADD for uncompressing local file only
