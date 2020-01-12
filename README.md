@@ -33,6 +33,102 @@ EOF
 - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
 - docker port to find port mapping. EXPOSE, -p and -P
 - LABEL vs MAINTAINER (deprecated) -> docker inspect to view image labels.
+- Links vs userdefined networks (https://stackoverflow.com/questions/41768157/how-to-link-container-in-docker)
+```
+$ export today=Wednesday
+[node1] (local) root@192.168.0.23 ~
+$ docker run -e "deep=purple" -e today --rm alpine env
+Unable to find image 'alpine:latest' locally
+latest: Pulling from library/alpine
+e6b0cf9c0882: Pull complete 
+Digest: sha256:2171658620155679240babee0a7714f6509fae66898db422ad803b951257db78
+Status: Downloaded newer image for alpine:latest
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=8179e75053af
+deep=purple
+today=Wednesday
+HOME=/root
+```
+- https://docs.docker.com/engine/reference/run/#healthcheck --format '{{json .State.Health.Status}}' with docker inspect or also docker ps
+- docker attach vs docker exec
+# Storage and Volumes
+- --volume => originally for standalone containers --mount for services in swarm mode. Now you can use --mount for both
+- https://docs.docker.com/storage/bind-mounts/#start-a-container-with-a-bind-mount
+- -v \<pathOnHost\>:\<onCont\>:<ro[, consistent, delegated, cached, z]>
+- --mount type: bind, volume, tmfs | source
+- If you use -v or --volume to bind-mount a file or directory that does not yet exist on the Docker host, -v creates the endpoint for you. It is always created as a directory.
+- If you use --mount to bind-mount a file or directory that does not yet exist on the Docker host, Docker does not automatically create it for you, but generates an error.
+- If you bind-mount into a non-empty directory on the container, the directory’s existing contents are obscured by the bind mount
+- What happens when you do this?
+```
+   $ docker run -d -it  --name broken-container 
+  -v /tmp:/usr  nginx:latest
+   or
+   $ docker run -d -it --name broken-container --mount type=bind,source=/tmp,target=/usr  nginx:latest
+docker: Error response from daemon: oci runtime error: container_linux.go:262:
+starting container process caused "exec: \"nginx\": executable file not found in $PATH".
+```
+- https://docs.docker.com/storage/volumes/
+- --mount type=bind,source="$(pwd)"/target,target=/app,readonly 
+- -v "$(pwd)"/target:/app:ro
+- Bind propagation defaults to rprivate for bind mounts. 
+- Volumes use rprivate bind propagation, and bind propagation is not configurable for volumes
+- Docker Desktop for Mac uses osxfs to propagate directories and files shared from macOS to the Linux VM. 
+- bind vs volume vs tmps
+- Backup a container's volume using volume-from:
+```
+$ docker run --rm --volumes-from dbstore -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /dbdata
+$ docker run -v /dbdata --name dbstore2 ubuntu /bin/bash
+$ docker run --rm --volumes-from dbstore2 -v $(pwd):/backup ubuntu bash -c "cd /dbdata && tar xvf /backup/backup.tar --strip 1"
+```
+- -rm removes anonymous volumes not names ones
+- docker volume prune => to remove all unused volumes
+- --tmfs (standalone container) vs --mount
+- docker ps -s
+   - size = writeable layer | virtual size = writeable layer + RO image (overestimates)
+   - total size of 'n' containers using same image = nSize + (virtual size - size)
+- Container space constituents : 
+   - Disk space used for log files if you use the json-file logging driver. 
+   - Volumes and bind mounts used by the container.
+   - Disk space used for the container’s configuration files, which are typically small.
+   - Memory written to disk (if swapping is enabled).
+   - Checkpoints, if you’re using the experimental checkpoint/restore feature.
+- overlay2, aufs, and overlay => file level rather than the block level. This uses memory more efficiently, but the container’s writable layer may grow quite large in write-heavy workloads.
+- devicemapper, btrfs, and zfs => Block-level storage drivers. perform better for write-heavy workloads (though not as well as Docker volumes).
+- For lots of small writes or containers with many layers or deep filesystems, overlay may perform better than overlay2, but consumes more inodes, which can lead to inode exhaustion.
+- btrfs and zfs require a lot of memory.
+- zfs is a good choice for high-density workloads such as PaaS.
+- Relationship between dockerfile and docker-compose.yml : https://www.techrepublic.com/article/what-is-the-difference-between-dockerfile-and-docker-compose-yml-files/
+
+## DOCKERFILE
+- https://docs.docker.com/engine/reference/builder
+- Releases : Stable & experimental
+- Only ARG & directives can be before FROM
+```
+ARG  CODE_VERSION=latest
+FROM base:${CODE_VERSION}
+CMD  /code/run-app
+
+FROM extras:${CODE_VERSION}
+CMD  /code/run-extras
+```
+- https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
+- Environment variables defined using the ENV instruction always override an ARG instruction of the same name.
+- https://docs.docker.com/engine/reference/builder/#predefined-args 
+- Predefined args are not cached unless specified in the dockerfile using ARG. Read about it.
+- RUN has two formats (RUN <cmd> => shell form and RUN ["executable", "param1", "param2"] (exec form))
+```
+  RUN /bin/bash -c 'source $HOME/.bashrc; echo $HOME'
+  RUN ["/bin/bash", "-c", "echo hello"]
+```
+ - The main purpose of a CMD is to provide defaults for an executing container. These defaults can include an executable, or they can omit the executable, in which case you must specify an ENTRYPOINT instruction as well. - CMD - JSON Array w/o shell
+- CMD ["executable","param1","param2"] (exec form, this is the preferred form)
+- CMD ["param1","param2"] (as default parameters to ENTRYPOINT)
+- CMD command param1 param2 (shell form)
+- COPY vs ADD (copy + URL or even extract tar file into destination)
+- use curl or wget to download .tar from remote location instead of ADD. Use ADD for uncompressing local file only
+- Use COPY over ADD when possible
+- HEALTHCHECK --interval 5s CMD ping google.com (default --timeout and --interval 30s, --start-period 0, --retries 3) => docker ps and also docker container inspect 
 
 
 # docker EE:
