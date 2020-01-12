@@ -121,14 +121,35 @@ CMD  /code/run-extras
   RUN /bin/bash -c 'source $HOME/.bashrc; echo $HOME'
   RUN ["/bin/bash", "-c", "echo hello"]
 ```
+- COPY vs ADD (copy + URL or even extract tar file into destination)
+- use curl or wget to download .tar from remote location instead of ADD. Use ADD for uncompressing local file only
+- Use COPY over ADD when possible
+- HEALTHCHECK --interval 5s CMD ping google.com (default --timeout and --interval 30s, --start-period 0, --retries 3) => docker ps and also docker container inspect
  - The main purpose of a CMD is to provide defaults for an executing container. These defaults can include an executable, or they can omit the executable, in which case you must specify an ENTRYPOINT instruction as well. - CMD - JSON Array w/o shell
 - CMD ["executable","param1","param2"] (exec form, this is the preferred form)
 - CMD ["param1","param2"] (as default parameters to ENTRYPOINT)
 - CMD command param1 param2 (shell form)
+- CMD = Overwrite, ENTRYPOINT = doesn't override but appends
+- like if CMD ["sh"] and during run if u say "ping -c 10 google.com", it will run ping 10 times and exit
+```
+   FROM busybox
+   ENTRYPOINT ["/bin/ping"]
+   
+   $ docker build . -t myimage
+   $ docker run -dt --name c1 myimage sh => /bin/ping sh (appended)
+   
+```
+
 - COPY vs ADD (copy + URL or even extract tar file into destination)
 - use curl or wget to download .tar from remote location instead of ADD. Use ADD for uncompressing local file only
 - Use COPY over ADD when possible
 - HEALTHCHECK --interval 5s CMD ping google.com (default --timeout and --interval 30s, --start-period 0, --retries 3) => docker ps and also docker container inspect 
+- docker tag | 
+- docker search nginix --limit 5
+- docker search --filter "is-official=true" --filter "stars=3" busybox
+- docker search --format "{{.Name}}: {{.StarCount}}" nginx
+- docker search --format "table {{.Name}}\t{{.IsAutomated}}\t{{.IsOfficial}}" nginx
+- docker container commit container1 modified-image-based-on-container1 (while container is being committed, its process is  paused)
 
 
 # docker EE:
