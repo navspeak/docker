@@ -7,6 +7,11 @@
 - Storage and Volumes (10%)
 
 https://medium.com/bb-tutorials-and-thoughts/250-practice-questions-for-the-dca-exam-84f3b9e8f5ce
+http://www.adelzaalouk.me/2017/docker-musings/
+## using jq with Docker
+- docker inspect <container_name> | jq .\[0\] | jq keys
+- docker inspect <container_name> | jq .\[0\] | jq .DockerVersion
+   - "1.12.3"
 
 # Images:
 ## Dockerfile
@@ -160,6 +165,9 @@ CMD  /code/run-extras
 - export & import => containers 
 - save and load => images
 
+## Docker Networking
+- https://docs.docker.com/network/overlay/#encrypt-traffic-on-an-overlay-network
+- [Physically hosted application](https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s){:target="_blank"}
 # docker EE:
 
 ## Installation on centos digital ocean droplet:
