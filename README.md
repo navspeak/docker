@@ -167,7 +167,8 @@ CMD  /code/run-extras
 
 ## Docker Networking
 - https://docs.docker.com/network/overlay/#encrypt-traffic-on-an-overlay-network
-- [Physically hosted application](https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s){:target="_blank"}
+- [Physically hosted application](https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s){:target="_blank" rel="noopener"}
+
 # docker EE:
 
 ## Installation on centos digital ocean droplet:
