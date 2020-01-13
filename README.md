@@ -319,6 +319,7 @@ https://success.docker.com/article/docker-enterprise-best-practices
 - 2 vCPUs for node running DTR
 - 10 GB of free space
 - To install DTR, all nodes must be a worker node managed by UCP. Must have fixed hostname.
+
 ```
 docker run -it --rm docker/dtr install \
   --ucp-node node2 \
@@ -366,6 +367,9 @@ docker container run --log-driver none -i --rm docker/dtr backup \
 To backup images get the DTR volume :
 cd /var/lib/docker/volumes/<br>
 tar -czvf dtr-registry-backup.tar.gz dtr-reistry-REPLICAID
+
+## HRM
+https://success.docker.com/article/ucp-service-discovery-swarm
 
 ## Limiting CPU for containers
 - --cpus=1 (if u have 2 CPUs, this guarantees at most 1 CPU. You can also provide 0.5 as a value)
