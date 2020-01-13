@@ -157,6 +157,8 @@ CMD  /code/run-extras
 - docker container run --name myubuntu ubuntu
 - docker export myubuntu > myubuntu.tar
 - cat myubuntu.tar | docker import - myubuntuimage:latest => one layer - less size
+- export & import => containers 
+- save and load => images
 
 # docker EE:
 
