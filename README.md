@@ -12,7 +12,101 @@ http://www.adelzaalouk.me/2017/docker-musings/
 - docker inspect <container_name> | jq .\[0\] | jq keys
 - docker inspect <container_name> | jq .\[0\] | jq .DockerVersion
    - "1.12.3"
+- (2375 for unencrypted dockerd and 2376 for encrypted)[https://docs.docker.com/engine/reference/commandline/dockerd/]
+- 2377 - TCP - Cluster mgmt communication
+- 4789 - UDP - overlay network traffic
+- 7946 - TCP/UDP - communication between nodes
 
+## Orchestration
+- $ docker swarm init --advertise-addr 192.168.0.13 --listen-addr 192.168.0.13
+```
+Swarm initialized: current node (u9u6h80ju0l3obpn5fzung612) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-35unrlnskdez6708m0vplmqm4o8exakk6k6sz01d1upilxr428-3wgalezvqv4uy8lnmihepsn61 192.168.0.13:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+```
+- docker swarm join --token SWMTKN-1-CLUSTERID-MGRTOKEN IP:2377
+- docker swarm join --token SWMTKN-1-CLUSTERID-MWRKTOKEN IP:2377
+- On a node where swarm isn't initilised
+  - $ docker network ls => bridge, host, none (null driver)
+  - after it joins the swarm as manager or worker => docker_gwbridge (bridge) and ingress(overlay)
+```
+$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+f38edc93a8a9        bridge              bridge              local
+d193ef924940        docker_gwbridge     bridge              local
+b4befbbd8887        host                host                local
+jjrm003op8so        ingress             overlay             swarm
+dec0198d34a8        none                null                local
+```
+- docker node ls => AVAILABILITY, MANAGER STATUS (LEADER)
+- docker service create --replicas 3 --name xyz busybox sleep 5m
+- docker service ls
+```
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+j93ejjiifs3b        xyz                 replicated          2/2                 busybox:latest    
+```
+- docker service inspect xyz --pretty
+- docker service ps xyz
+```
+$ docker service ps xyz
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+uosjx6wvudkp        xyz.1               busybox:latest      node2               Running             Running about a minute ago                       
+lora1ydrcod2        xyz.2               busybox:latest      node1               Running             Running about a minute ago         
+```
+- on the nodes go and run "docker ps"
+- docker service scale SERVICE1=N1 SERVICE2=N2 or docker service update 
+- docker service update --image busybox:musl xyz
+- docker service update --update-parallelism 2  xyz
+- docker service rollback xyz
+- https://medium.com/better-programming/rollout-and-rollback-in-docker-swarm-7f19e2fe2cd1
+```
+$ docker service create --name whoami \
+--replicas 2 \
+--update-failure-action rollback \  #continue or pause. Default scheduler pauses if 1 of the tasks returns failure
+--update-delay 10s \
+--update-monitor 10s \
+--publish 8000:8000 \
+lucj/whoami:1.0
+```
+- (placement constraints)[https://success.docker.com/article/using-contraints-and-labels-to-control-the-placement-of-containers]
+- docker node update --label-add region=east node1
+```
+docker service create \
+    --name nginx-east-no-devel \
+    --constraint node.labels.region==east \
+    --constraint node.labels.type!=devel \
+    nginx
+```
+- (placement-prefs)[https://docs.docker.com/engine/swarm/services/#placement-constraints]
+- docker service create --placement-pref 'spread=node.label.zone'
+```
+$ ls -l /var/lib/docker/swarm
+total 8
+drwxr-xr-x    2 root     root            75 Jan 13 13:25 certificates
+-rw-------    1 root     root           216 Jan 13 13:25 docker-state.json
+drwx------    4 root     root            55 Jan 13 13:25 raft
+-rw-------    1 root     root            68 Jan 13 13:25 state.json
+drwxr-xr-x    2 root     root            22 Jan 13 13:25 worker
+```
+- docker swarm update --autolock=true or docker swarm init --autolock => encrypts encryption key
+- docker swarm unlock-key
+```
+ docker swarm unlock-key --rotate
+Successfully rotated manager unlock key.
+
+To unlock a swarm manager after it restarts, run the `docker swarm unlock`
+command and provide the following key:
+
+    SWMKEY-1-QGyrIy6yYq2F46QVuUL95XLXWjPfvBNZxRvAvTxG85E
+
+Please remember to store this key in a password manager, since without it you
+will not be able to restart the manager.
+```
 # Images:
 ## Dockerfile
 https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
@@ -167,7 +261,8 @@ CMD  /code/run-extras
 
 ## Docker Networking
 - https://docs.docker.com/network/overlay/#encrypt-traffic-on-an-overlay-network
-- [Physically hosted application](https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s){:target="_blank" rel="noopener"}
+- [Physically hosted application](https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s) [Virtual Applications] (https://www.youtube.com/watch?v=PpyPa92r44s&t=1820s)
+
 
 # docker EE:
 
