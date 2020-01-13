@@ -28,6 +28,7 @@ To add a worker to this swarm, run the following command:
 
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 ```
+- docker swarm join-token manager => to get manager token. Worker token replace manager w/worker
 - docker swarm join --token SWMTKN-1-CLUSTERID-MGRTOKEN IP:2377
 - docker swarm join --token SWMTKN-1-CLUSTERID-MWRKTOKEN IP:2377
 - On a node where swarm isn't initilised
